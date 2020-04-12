@@ -1,0 +1,86 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 5e6d5453a094b952cd562ecbbb28bc6f8578deff6004695012787bca1cb19dec
+
+name:           projet-paf
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/projet-paf#readme>
+homepage:       https://github.com/githubuser/projet-paf#readme
+bug-reports:    https://github.com/githubuser/projet-paf/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2020 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/projet-paf
+
+library
+  exposed-modules:
+      Carte
+      Environnement
+      Keyboard
+      Model
+      Modele
+      Sprite
+      SpriteMap
+      TextureMap
+  other-modules:
+      Paths_projet_paf
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , linear
+    , random
+    , sdl2
+    , sdl2-image
+  default-language: Haskell2010
+
+executable projet-paf-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_projet_paf
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , linear
+    , projet-paf
+    , random
+    , sdl2
+    , sdl2-image
+  default-language: Haskell2010
+
+test-suite projet-paf-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      CarteTeste
+      Paths_projet_paf
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      CarteTeste
+    , base >=4.7 && <5
+    , containers
+    , linear
+    , projet-paf
+    , random
+    , sdl2
+    , sdl2-image
+  default-language: Haskell2010
