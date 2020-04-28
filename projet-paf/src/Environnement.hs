@@ -8,9 +8,18 @@ import Carte
 
 data Entite = Vache {iden :: Int, pvie :: Int} 
             | Joueur {iden :: Int, pvie :: Int}
+            | Monstre {iden :: Int, pvie :: Int}
 
 data Envi = Envi {contenu_envi :: M.Map Coord [Entite]}
 
+
+
+initEnvi :: Carte -> Envi
+initEnvi carte = 
+    let coordJoueur = getCoordEntree carte
+        (x:liste) = getCoordNormal carte
+    in
+        Envi (M.insert coordJoueur [(Joueur 1 100)] M.empty)
 
 trouve_id :: Int -> Envi -> Maybe (Coord, Entite)
 trouve_id id (Envi contenu) = 
@@ -42,7 +51,14 @@ bouge_id id newCoord envi =
         Just (_,entite) -> let (Envi contenu) = remouve_env_id id envi in
                          (Envi (M.insertWith (++) newCoord [entite] contenu) )
         Nothing -> envi
-    
+
+franchissable_env :: Coord -> Envi -> Bool
+franchissable_env coord (Envi contenu) =  M.foldlWithKey(\res c liste ->
+                                        case (L.find(\entite -> entite == (Monstre 5 6) ) liste ) of
+                                        Just e -> False
+                                        _ ->  res
+                                        ) True contenu
+                
 
 
 

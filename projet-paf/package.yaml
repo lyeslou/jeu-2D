@@ -26,6 +26,7 @@ dependencies:
 - random
 - sdl2
 - sdl2-image
+- text
 
 library:
   source-dirs: src

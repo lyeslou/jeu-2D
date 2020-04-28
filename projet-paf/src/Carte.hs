@@ -3,6 +3,9 @@ module Carte where
 import qualified Data.Map.Strict as M
 import qualified Data.List as L
 
+import Data.Text
+import qualified Data.Text as T
+
 data PDirection = NS | EO deriving Eq
 
 data StatutP = Ouverte | Fermee deriving Eq
@@ -27,12 +30,55 @@ instance Ord Coord where
 instance Show Coord where
     show (C x y)= show "(" ++ show x ++", " ++ show y ++ show ")" 
 
+instance Read Carte where
+    readsPrec _ text = [(readCarte text, "")]
+
+instance Show Carte where
+    show  = showCarte
+            
+caseTochar :: Case -> String
+caseTochar caz = case caz of                  
+                    Mur -> "x"
+                    Entree -> "e"
+                    Sortie -> "s"
+                    (Porte EO _) -> "|"
+                    (Porte NS _) -> "-"
+                    Normal -> " "
+showCarte (Carte l h map) = 
+     M.foldlWithKey (\res (C col lign) caz -> 
+        let r= res ++ (caseTochar caz) in
+            if l == (col+1) 
+            then r ++ "\n" 
+            else r ) "" map
+
+readCarte :: String -> Carte
+readCarte contenu =
+    let lignes = T.splitOn (pack "\n") (pack contenu) in
+        let (mapCarte, maxCol, maxLigne)= L.foldl(\(m, c, l) ligne -> 
+             T.foldl (\(map, col, lig) caz -> ( (M.insert (C col lig) (convertCase caz) map), (col+1), lig )  ) (m, 0, (l+1)) ligne 
+             ) (M.empty, 0, (-1))  lignes 
+        in
+            let Just ((C maxC maxL),_) = M.lookupMax mapCarte in
+                Carte (maxC+1) (maxL+1) mapCarte
+
+
+convertCase :: Char -> Case
+convertCase c = case c of  
+                'x' -> Mur
+                'e' -> Entree
+                's' -> Sortie
+                '|' -> (Porte EO Fermee)
+                '-' -> (Porte NS Fermee)
+                ' ' -> Normal
+                 
+
+
 
 
 compareCoord :: Coord -> Coord -> Ordering
-compareCoord (C x1 y1) (C x2 y2) | y1 < y2 = GT
-                                 | y1 > y2 = LT
-                                 | x1 < x2 = GT
+compareCoord (C x1 y1) (C x2 y2) | y1 < y2 = LT
+                                 | y1 > y2 = GT
+                                 | x1 < x2 = LT
                                  | x1 > x2 = GT
                                  | otherwise = EQ
 
@@ -62,7 +108,25 @@ fermerPorte :: Coord -> Carte -> Maybe Carte
 fermerPorte coord c@(Carte l h carte) = 
     case (getCase coord c ) of
         Just (Porte d _) -> Just (Carte l h (M.insert coord (Porte d Fermee) carte) )
-        _ -> Nothing 
+        _ -> Nothing
+
+getCoordNormal :: Carte -> [Coord]
+getCoordNormal (Carte _ _ contenu) =
+    M.foldlWithKey 
+        (\liste coord caz -> 
+            if caz == Normal
+            then (coord:liste)
+            else liste)
+        [] contenu
+getCoordEntree :: Carte -> Coord
+getCoordEntree (Carte _ _ contenu) =
+    M.foldlWithKey 
+        (\c coord caz -> 
+            if caz == Entree
+            then coord
+            else c)
+        (C 0 0) contenu
+ 
 
          
 
@@ -108,17 +172,17 @@ inv_porte_murs (Carte l h carte )=
             Porte EO _ -> case (M.lookup (C x (y-1)) carte, (M.lookup (C x (y-1) ) carte) ) of 
                                 (Just Mur, Just Mur)-> True && res
                                 (_,_) -> False    
-            _ -> False ) True carte
+            _ -> True ) True carte
 
 
 ligne_de_murVerticale :: Carte -> Bool
 ligne_de_murVerticale (Carte l h carte) =
-    foldl(\res y -> case (M.lookup (C 0 y) carte, M.lookup (C l y) carte ) of
+    L.foldl(\res y -> case (M.lookup (C 0 y) carte, M.lookup (C l y) carte ) of
                          (Just Mur,Just Mur) -> res && True
                          (_,_) -> False)  True [0..h]
 
 ligne_de_murHorizontale :: Carte -> Bool
 ligne_de_murHorizontale (Carte l h carte) =
-    foldl(\res x -> case (M.lookup (C x 0) carte, M.lookup (C x h) carte ) of
+    L.foldl(\res x -> case (M.lookup (C x 0) carte, M.lookup (C x h) carte ) of
                          (Just Mur,Just Mur) -> res && True
                          (_,_) -> False)  True [0..l]
