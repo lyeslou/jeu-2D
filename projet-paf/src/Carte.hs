@@ -17,18 +17,18 @@ data Case = Normal
     | Sortie
     deriving Eq
 
-data Coord = C {cx :: Int, cy :: Int} deriving Eq
+data Coord = C {cx :: Int, cy :: Int} deriving (Eq,Ord,Show)
 
 data Carte = Carte {cartel :: Int,
                     carteh :: Int,
                     carte_contenu :: (M.Map Coord Case)
                     }
 
-instance Ord Coord where
-    compare = compareCoord
+--instance Ord Coord where
+  --  compare = compareCoord
 
-instance Show Coord where
-    show (C x y)= show "(" ++ show x ++", " ++ show y ++ show ")" 
+--instance Show Coord where
+  --  show (C x y)= show "(" ++ show x ++", " ++ show y ++ show ")" 
 
 instance Read Carte where
     readsPrec _ text = [(readCarte text, "")]
@@ -126,6 +126,9 @@ getCoordEntree (Carte _ _ contenu) =
             then coord
             else c)
         (C 0 0) contenu
+
+getAdjCase :: Coord -> Carte -> [(String, Maybe Case)]
+getAdjCase (C x y ) carte = [("Est", (getCase (C (x-1) y) carte) ), ("Nord", (getCase (C x (y-1) ) ) carte), ("Sud", (getCase (C x (y+1) ) carte) ),("Ouest", (getCase (C (x+1) y ) carte) ) ]
  
 
          

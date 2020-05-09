@@ -53,11 +53,10 @@ bouge_id id newCoord envi =
         Nothing -> envi
 
 franchissable_env :: Coord -> Envi -> Bool
-franchissable_env coord (Envi contenu) =  M.foldlWithKey(\res c liste ->
-                                        case (L.find(\entite -> entite == (Monstre 5 6) ) liste ) of
-                                        Just e -> False
-                                        _ ->  res
-                                        ) True contenu
+franchissable_env coord (Envi contenu) = 
+    case (M.lookup coord contenu) of
+         Nothing -> True
+         _ -> False
                 
 
 
