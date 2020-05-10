@@ -128,7 +128,7 @@ getCoordEntree (Carte _ _ contenu) =
         (C 0 0) contenu
 
 getAdjCase :: Coord -> Carte -> [(String, Maybe Case)]
-getAdjCase (C x y ) carte = [("Est", (getCase (C (x-1) y) carte) ), ("Nord", (getCase (C x (y-1) ) ) carte), ("Sud", (getCase (C x (y+1) ) carte) ),("Ouest", (getCase (C (x+1) y ) carte) ) ]
+getAdjCase (C x y ) carte = [("Est", (getCase (C (x+1) y) carte) ), ("Nord", (getCase (C x (y-1) ) ) carte), ("Sud", (getCase (C x (y+1) ) carte) ),("Ouest", (getCase (C (x-1) y ) carte) ) ]
  
 
          

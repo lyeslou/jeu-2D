@@ -13,13 +13,17 @@ data Entite = Vache {iden :: Int, pvie :: Int}
 data Envi = Envi {contenu_envi :: M.Map Coord [Entite]}
 
 
+get_objets :: Envi -> M.Map Int Entite
+get_objets (Envi cont) = 
+    M.foldl(\map liste -> L.foldl(\m entite -> M.insert (id_entite entite) entite m) map liste
+    ) M.empty cont
 
 initEnvi :: Carte -> Envi
 initEnvi carte = 
     let coordJoueur = getCoordEntree carte
         (x:liste) = getCoordNormal carte
     in
-        Envi (M.insert coordJoueur [(Joueur 1 100)] M.empty)
+        Envi (M.insert coordJoueur [(Joueur 1 100), (Vache 2 100), (Vache 3 100)] M.empty)
 
 trouve_id :: Int -> Envi -> Maybe (Coord, Entite)
 trouve_id id (Envi contenu) = 

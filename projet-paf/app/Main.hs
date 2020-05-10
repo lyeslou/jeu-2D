@@ -39,6 +39,7 @@ import qualified System.IO as I
 import Carte
 import Environnement
 import Modele 
+import Etat
  
 
 loadBackground :: Renderer-> FilePath -> TextureMap -> SpriteMap -> IO (TextureMap, SpriteMap)
@@ -77,6 +78,13 @@ loadPerso rdr path tmap smap = do
   let smap' = SM.addSprite (SpriteId "perso") sprite smap
   return (tmap', smap')
 
+loadVache :: Renderer-> FilePath -> TextureMap -> SpriteMap -> IO (TextureMap, SpriteMap)
+loadVache rdr path tmap smap = do
+  tmap' <- TM.loadTexture rdr path (TextureId "vache") tmap
+  let sprite = S.defaultScale $ S.addImage S.createEmptySprite $ S.createImage (TextureId "vache") (S.mkArea 0 0 60 60)
+  let smap' = SM.addSprite (SpriteId "vache") sprite smap
+  return (tmap', smap')
+
 loadNormal :: Renderer-> FilePath -> TextureMap -> SpriteMap -> IO (TextureMap, SpriteMap)
 loadNormal rdr path tmap smap = do
   tmap' <- TM.loadTexture rdr path (TextureId "normale") tmap
@@ -113,7 +121,8 @@ main = do
   (tmap'', smap'') <- loadDepart renderer "assert/depart.png" tmap' smap'
   (tmapf, smapf) <- loadSortie renderer "assert/drapeau.png" tmap'' smap''
   (tmapf',smapf') <- loadPerso renderer "assert/marioArretDroite.png" tmapf smapf
-  (tmapf'', smapf'') <- loadNormal renderer "assert/normal.png" tmapf' smapf'
+  (tmapf, smapf) <- loadVache renderer "assert/tortueArretGauche.png" tmapf' smapf'
+  (tmapf'', smapf'') <- loadNormal renderer "assert/normal.png" tmapf smapf
   (tmapfPrefinal, smapfPrefinal) <- loadPorteEO renderer "assert/porteEO.png" tmapf'' smapf''
   (tmapfFinal, smapfFinal) <- loadPorteNS renderer "assert/porteNS.png" tmapfPrefinal smapfPrefinal
   
@@ -133,16 +142,17 @@ main = do
   gene <- Rand.getStdGen
    
   -- initialisation de l'état du jeu
-  let gameModel = initModel carte gene kbd
-  putStr (show carte)
+  let gameEtat = init_etat carte gene 
+  
   -- lancement de la gameLoop
-  gameLoop 60 renderer tmapfFinal smapfFinal kbd gameModel carte
+  gameLoop 60 renderer tmapfFinal smapfFinal kbd gameEtat
 
-gameLoop :: (RealFrac a, Show a) => a -> Renderer -> TextureMap -> SpriteMap -> Keyboard -> Modele -> Carte-> IO ()
-gameLoop frameRate renderer tmap smap kbd gameModel carte  = do
+gameLoop :: (RealFrac a, Show a) => a -> Renderer -> TextureMap -> SpriteMap -> Keyboard -> Etat -> IO ()
+gameLoop frameRate renderer tmap smap kbd etat@(Tour num carte env@(Envi envi) gen obj jour)  = do
   startTime <- time
+  event <- waitEvent
   events <- pollEvents
-  let kbd' = K.handleEvents events kbd
+  let kbd' = K.handleEvents (event:events) kbd
 
   
   clear renderer
@@ -189,6 +199,34 @@ gameLoop frameRate renderer tmap smap kbd gameModel carte  = do
         
     ) (putStrLn"affichage de la carte") (carte_contenu carte)
 
+
+  M.foldlWithKey (\res id entite  -> 
+      case trouve_id id env of 
+       Just ((C x y) , _ ) -> 
+           case entite  of
+            (Joueur _ _ )-> do 
+                     res
+                     S.displaySprite renderer tmap (S.moveTo (SM.fetchSprite (SpriteId "perso") smap)
+                                 ( fromIntegral (x*60) )
+                                 (  fromIntegral (y*60) ) ) 
+            
+            (Vache _ _)-> do 
+                     res
+                     S.displaySprite renderer tmap (S.moveTo (SM.fetchSprite (SpriteId "vache") smap)
+                                  ( fromIntegral (x*60) )
+                                 (  fromIntegral (y*60) ) )
+            
+            (Monstre _ _ ) ->do
+                    res
+                    S.displaySprite renderer tmap (S.moveTo (SM.fetchSprite (SpriteId "monstre") smap)
+                                  ( fromIntegral (x*60) )
+                                 (  fromIntegral (y*60) ) )
+            
+            otherwise -> do 
+                    res
+      )(putStrLn "afichage des objets") obj
+  
+
   
  
   
@@ -205,8 +243,8 @@ gameLoop frameRate renderer tmap smap kbd gameModel carte  = do
   -- putStrLn $ "Frame rate: " <> (show (1 / deltaTime)) <> " (frame/s)"
   --- update du game state
 
-  --let gameState' = M.gameStep gameState kbd' deltaTime
+  let etat' = etat_tour etat kbd' deltaTime
   ---
-  unless (K.keypressed KeycodeEscape kbd') (gameLoop frameRate renderer tmap smap kbd' gameModel carte)
+  unless (K.keypressed KeycodeEscape kbd') (gameLoop frameRate renderer tmap smap kbd' etat' )
 
    

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8e68f047e2906b3885150c7bf6ce1da8d21dcdbe684a29172fed36155918bf1b
+-- hash: 31aa9253dbf2fd505ce0eb153deb25de09b261029696e58042d24ec3b3aeb157
 
 name:           projet-paf
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       Carte
       Environnement
+      Etat
       Keyboard
       Modele
       Sprite
