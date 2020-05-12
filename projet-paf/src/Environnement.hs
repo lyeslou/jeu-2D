@@ -61,6 +61,14 @@ franchissable_env coord (Envi contenu) =
     case (M.lookup coord contenu) of
          Nothing -> True
          _ -> False
+
+getCoordJoueur :: Envi -> Maybe Coord
+getCoordJoueur envi =
+    case trouve_id 1 envi of
+         Nothing -> Nothing
+         Just(coord,_) -> Just coord
+
+
                 
 
 

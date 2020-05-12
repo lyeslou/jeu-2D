@@ -44,13 +44,26 @@ tour_joueur :: Modele -> Modele
 tour_joueur modele@ (Cont carte env gen log kb) = 
     case (trouve_id 1 env) of
          Nothing -> modele
-         Just((C x y),entite)->
+         Just(coord@(C x y),entite)->
              foldl(\nmodele k-> if k == KeycodeZ 
                                 then bouge nmodele entite (C x (y-1))
                                 else if k == KeycodeS then bouge nmodele entite (C x (y+1))
                                 else if k == KeycodeD then bouge nmodele entite (C (x+1) y)
                                 else if k == KeycodeQ then bouge nmodele entite (C (x-1) y)
+                                else if k == KeycodeH then utiliser_portes nmodele coord
                                 else nmodele) modele kb
+
+utiliser_portes :: Modele -> Coord -> Modele
+utiliser_portes modele coord@(C x y) =
+    L.foldl(\m@(Cont carte _ _ _ _) cord ->
+        case utiliserPorte cord carte of
+             Nothing -> m
+             Just c-> m{carte=c} ) 
+            modele [(C (x+1) y), (C (x-1) y), (C x (y-1)), (C x (y+1))]
+
+gagner :: Modele -> Bool
+gagner modele@(Cont carte env gen log kb) = 
+    (getCoordJoueur env) ==  (pure (getCoordSortie carte) ) 
                             
 
 

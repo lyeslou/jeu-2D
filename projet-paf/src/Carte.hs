@@ -110,6 +110,14 @@ fermerPorte coord c@(Carte l h carte) =
         Just (Porte d _) -> Just (Carte l h (M.insert coord (Porte d Fermee) carte) )
         _ -> Nothing
 
+utiliserPorte :: Coord -> Carte -> Maybe Carte
+utiliserPorte coord c@(Carte l h carte) = 
+    case (getCase coord c ) of
+        Just (Porte d Ouverte) -> Just (Carte l h (M.insert coord (Porte d Fermee) carte) )
+        Just (Porte d Fermee) -> Just (Carte l h (M.insert coord (Porte d Ouverte) carte) )
+        _ -> Nothing
+
+
 getCoordNormal :: Carte -> [Coord]
 getCoordNormal (Carte _ _ contenu) =
     M.foldlWithKey 
@@ -118,11 +126,21 @@ getCoordNormal (Carte _ _ contenu) =
             then (coord:liste)
             else liste)
         [] contenu
+
 getCoordEntree :: Carte -> Coord
 getCoordEntree (Carte _ _ contenu) =
     M.foldlWithKey 
         (\c coord caz -> 
             if caz == Entree
+            then coord
+            else c)
+        (C 0 0) contenu
+
+getCoordSortie :: Carte -> Coord
+getCoordSortie (Carte _ _ contenu) =
+    M.foldlWithKey 
+        (\c coord caz -> 
+            if caz == Sortie
             then coord
             else c)
         (C 0 0) contenu

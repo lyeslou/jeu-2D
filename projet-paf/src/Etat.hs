@@ -31,8 +31,10 @@ etat_tour :: RealFrac a => Etat -> Keyboard -> a -> Etat
 etat_tour  etat@(Tour num carte env gen obj jour) keyboard _ = 
     let modele = tour_joueur (Cont carte env gen jour keyboard)
         newmodele@(Cont carte' env' gen' jour' keyboard') = M.foldl (\res entite -> tour res entite) modele obj
-    in 
-        (Tour num carte' env' gen' obj jour')
+    in  
+        case gagner newmodele of
+            True -> Gagne
+            _ -> (Tour num carte' env' gen' obj jour')
 
 
 
